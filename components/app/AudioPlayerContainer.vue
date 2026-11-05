@@ -1,6 +1,18 @@
 <template>
   <div>
-    <app-audio-player ref="audioPlayer" :bookmarks="bookmarks" :sleep-timer-running="isSleepTimerRunning" :sleep-time-remaining="sleepTimeRemaining" :serverLibraryItemId="serverLibraryItemId" @selectPlaybackSpeed="showPlaybackSpeedModal = true" @selectVolumeBoost="showVolumeBoostModal = true" @updateVolumeBoost="(boost) => (volumeBoost = boost)" @updateTime="(t) => (currentTime = t)" @showSleepTimer="showSleepTimer" @showBookmarks="showBookmarks" />
+    <app-audio-player
+      ref="audioPlayer"
+      :bookmarks="bookmarks"
+      :sleep-timer-running="isSleepTimerRunning"
+      :sleep-time-remaining="sleepTimeRemaining"
+      :serverLibraryItemId="serverLibraryItemId"
+      @selectPlaybackSpeed="showPlaybackSpeedModal = true"
+      @selectVolumeBoost="showVolumeBoostModal = true"
+      @updateVolumeBoost="(boost) => (volumeBoost = boost)"
+      @updateTime="(t) => (currentTime = t)"
+      @showSleepTimer="showSleepTimer"
+      @showBookmarks="showBookmarks"
+    />
 
     <modals-playback-speed-modal v-model="showPlaybackSpeedModal" :playback-rate.sync="playbackSpeed" @update:playbackRate="updatePlaybackSpeed" @change="changePlaybackSpeed" />
     <modals-volume-boost-modal v-model="showVolumeBoostModal" :volume-boost="volumeBoost" @change="changeVolumeBoost" />
