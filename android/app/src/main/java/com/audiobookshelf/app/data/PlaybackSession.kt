@@ -86,6 +86,11 @@ class PlaybackSession(
   val mediaItemId
     get() = if (episodeId.isNullOrEmpty()) libraryItemId ?: "" else "$libraryItemId-$episodeId"
 
+  /** A download keeps its server libraryItemId, so it shares a boost with the streamed book. */
+  @get:JsonIgnore
+  val volumeBoostKey
+    get() = if (libraryItemId.isNullOrEmpty()) localLibraryItem?.id else libraryItemId
+
   @JsonIgnore
   fun getCurrentTrackIndex(): Int {
     for (i in 0 until audioTracks.size) {

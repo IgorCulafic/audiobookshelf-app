@@ -54,6 +54,8 @@ class AudioPlayer: NSObject {
     
     internal var currentTrackIndex = 0
     private var allPlayerItems:[AVPlayerItem] = []
+
+    private let volumeBoostControl = VolumeBoostControl()
     
     // MARK: - Constructor
     init(sessionId: String, playWhenReady: Bool = false, playbackRate: Float = 1) {
@@ -126,6 +128,7 @@ class AudioPlayer: NSObject {
         setupTimeObservers()
         setupQueueObserver()
         setupQueueItemStatusObserver()
+        applyVolumeBoost(boostDb: playbackSession.volumeBoost)
 
         AbsLogger.info(message:"Audioplayer ready")
     }
@@ -171,6 +174,35 @@ class AudioPlayer: NSObject {
         return Database.shared.getPlaybackSession(id: self.sessionId)
     }
     
+    // MARK: - Volume boost
+    public func setVolumeBoost(_ boostDb: Float) {
+        self.getPlaybackSession()?.volumeBoost = boostDb
+        applyVolumeBoost(boostDb: boostDb)
+    }
+
+    private func applyVolumeBoost(boostDb: Float) {
+        self.volumeBoostControl.targetGain = VolumeBoostLimiter.dbToLinear(boostDb)
+
+        // Tracks only get an audio tap once a boost is used, so books that are never boosted
+        // play exactly as they would otherwise. After that a tap stays on at 0 dB, where it has no effect.
+        guard boostDb > 0 else { return }
+        for item in self.allPlayerItems where item.audioMix == nil {
+            let asset = item.asset
+            asset.loadValuesAsynchronously(forKeys: ["tracks"]) { [weak self] in
+                guard let self = self else { return }
+                guard asset.statusOfValue(forKey: "tracks", error: nil) == .loaded,
+                      let track = asset.tracks(withMediaType: .audio).first else {
+                    AbsLogger.error(message: "Volume boost has no audio track to attach to")
+                    return
+                }
+                DispatchQueue.runOnMainQueue {
+                    guard item.audioMix == nil else { return }
+                    item.audioMix = VolumeBoostTap.audioMix(for: track, control: self.volumeBoostControl)
+                }
+            }
+        }
+    }
+
     private func getItemIndexForTime(time:Double) -> Int {
         guard let playbackSession = self.getPlaybackSession() else { return 0 }
         for index in 0..<self.allPlayerItems.count {

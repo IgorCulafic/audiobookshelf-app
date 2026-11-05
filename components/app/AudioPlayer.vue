@@ -70,6 +70,10 @@
           <span v-else class="material-symbols text-3xl text-white text-opacity-0">bookmark</span>
 
           <span class="font-mono text-fg-muted cursor-pointer" style="font-size: 1.35rem" @click="$emit('selectPlaybackSpeed')">{{ currentPlaybackRate }}x</span>
+          <div v-if="showVolumeBoost" class="text-fg-muted cursor-pointer flex flex-col items-center" @click.stop="$emit('selectVolumeBoost')">
+            <span class="material-symbols text-3xl leading-none" :class="{ fill: currentVolumeBoost }">volume_up</span>
+            <span v-if="currentVolumeBoost" class="text-[10px] font-semibold leading-tight">+{{ currentVolumeBoost }} dB</span>
+          </div>
           <svg v-if="!sleepTimerRunning" xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-fg-muted cursor-pointer" fill="none" viewBox="0 0 24 24" stroke="currentColor" @click.stop="$emit('showSleepTimer')">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
           </svg>
@@ -157,6 +161,7 @@ export default {
       showFullscreen: false,
       totalDuration: 0,
       currentPlaybackRate: 1,
+      currentVolumeBoost: 0,
       currentTime: 0,
       bufferedTime: 0,
       playInterval: null,
@@ -298,6 +303,12 @@ export default {
     },
     isCasting() {
       return this.mediaPlayer === 'cast-player'
+    },
+    showVolumeBoost() {
+      // The boost happens in the phone's own player, so it can't reach a cast device or a browser
+      if (this.$platform === 'web' || this.isCasting) return false
+      // iOS can only process file based audio, not the HLS stream used when transcoding
+      return this.$platform === 'android' || this.isDirectPlayMethod || this.isLocalPlayMethod
     },
     mediaPlayer() {
       return this.playbackSession?.mediaPlayer || null
@@ -510,6 +521,17 @@ export default {
       this.currentPlaybackRate = speed
       this.updateTimestamp()
       AbsAudioPlayer.setPlaybackSpeed({ value: speed })
+    },
+    setVolumeBoost(boostDb) {
+      this.currentVolumeBoost = boostDb
+      this.$emit('updateVolumeBoost', boostDb)
+      AbsAudioPlayer.setVolumeBoost({ value: boostDb })
+    },
+    async loadVolumeBoost() {
+      if (!this.showVolumeBoost) return
+      const { value } = await AbsAudioPlayer.getVolumeBoost({ sessionId: this.playbackSession.id })
+      this.currentVolumeBoost = value
+      this.$emit('updateVolumeBoost', value)
     },
     restart() {
       this.seek(0)
@@ -886,6 +908,7 @@ export default {
       this.isLoading = true
       this.syncStatus = 0
       this.$store.commit('setPlaybackSession', this.playbackSession)
+      this.loadVolumeBoost()
 
       // Set track width
       this.$nextTick(() => {

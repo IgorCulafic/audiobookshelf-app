@@ -30,6 +30,17 @@ class DbManager {
     Paper.book("device").write("data", deviceData)
   }
 
+  fun getVolumeBoost(key: String): Float {
+    return Paper.book("volumeBoost").read(key) ?: 0f
+  }
+  fun saveVolumeBoost(key: String, boostDb: Float) {
+    if (boostDb == 0f) {
+      Paper.book("volumeBoost").delete(key)
+    } else {
+      Paper.book("volumeBoost").write(key, boostDb)
+    }
+  }
+
   fun getLocalLibraryItems(mediaType: String? = null): MutableList<LocalLibraryItem> {
     val localLibraryItems: MutableList<LocalLibraryItem> = mutableListOf()
     Paper.book("localLibraryItems").allKeys.forEach {

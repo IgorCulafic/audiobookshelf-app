@@ -1,8 +1,9 @@
 <template>
   <div>
-    <app-audio-player ref="audioPlayer" :bookmarks="bookmarks" :sleep-timer-running="isSleepTimerRunning" :sleep-time-remaining="sleepTimeRemaining" :serverLibraryItemId="serverLibraryItemId" @selectPlaybackSpeed="showPlaybackSpeedModal = true" @updateTime="(t) => (currentTime = t)" @showSleepTimer="showSleepTimer" @showBookmarks="showBookmarks" />
+    <app-audio-player ref="audioPlayer" :bookmarks="bookmarks" :sleep-timer-running="isSleepTimerRunning" :sleep-time-remaining="sleepTimeRemaining" :serverLibraryItemId="serverLibraryItemId" @selectPlaybackSpeed="showPlaybackSpeedModal = true" @selectVolumeBoost="showVolumeBoostModal = true" @updateVolumeBoost="(boost) => (volumeBoost = boost)" @updateTime="(t) => (currentTime = t)" @showSleepTimer="showSleepTimer" @showBookmarks="showBookmarks" />
 
     <modals-playback-speed-modal v-model="showPlaybackSpeedModal" :playback-rate.sync="playbackSpeed" @update:playbackRate="updatePlaybackSpeed" @change="changePlaybackSpeed" />
+    <modals-volume-boost-modal v-model="showVolumeBoostModal" :volume-boost="volumeBoost" @change="changeVolumeBoost" />
     <modals-sleep-timer-modal v-model="showSleepTimerModal" :current-time="sleepTimeRemaining" :sleep-timer-running="isSleepTimerRunning" :current-end-of-chapter-time="currentEndOfChapterTime" :is-auto="isAutoSleepTimer" @change="selectSleepTimeout" @cancel="cancelSleepTimer" @increase="increaseSleepTimer" @decrease="decreaseSleepTimer" />
     <modals-bookmarks-modal v-model="showBookmarksModal" :bookmarks="bookmarks" :current-time="currentTime" :library-item-id="serverLibraryItemId" :playback-rate="playbackSpeed" @select="selectBookmark" />
   </div>
@@ -22,9 +23,11 @@ export default {
       stream: null,
       download: null,
       showPlaybackSpeedModal: false,
+      showVolumeBoostModal: false,
       showBookmarksModal: false,
       showSleepTimerModal: false,
       playbackSpeed: 1,
+      volumeBoost: 0,
       currentTime: 0,
       isSleepTimerRunning: false,
       sleepTimerEndTime: 0,
@@ -143,6 +146,9 @@ export default {
     changePlaybackSpeed(speed) {
       console.log(`[AudioPlayerContainer] Change Playback Speed: ${speed}`)
       this.$store.dispatch('user/updateUserSettings', { playbackRate: speed })
+    },
+    changeVolumeBoost(boostDb) {
+      this.$refs.audioPlayer?.setVolumeBoost(boostDb)
     },
     settingsUpdated(settings) {
       console.log(`[AudioPlayerContainer] Settings Update | PlaybackRate: ${settings.playbackRate}`)

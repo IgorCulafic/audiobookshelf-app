@@ -367,6 +367,25 @@ class AbsAudioPlayer : Plugin() {
   }
 
   @PluginMethod
+  fun getVolumeBoost(call: PluginCall) {
+    Handler(Looper.getMainLooper()).post {
+      val ret = JSObject()
+      ret.put("value", playerNotificationService.getVolumeBoost().toDouble())
+      call.resolve(ret)
+    }
+  }
+
+  @PluginMethod
+  fun setVolumeBoost(call: PluginCall) {
+    val boostDb:Float = call.getFloat("value", 0f) ?: 0f
+
+    Handler(Looper.getMainLooper()).post {
+      playerNotificationService.setVolumeBoost(boostDb)
+      call.resolve()
+    }
+  }
+
+  @PluginMethod
   fun closePlayback(call: PluginCall) {
     Handler(Looper.getMainLooper()).post {
       playerNotificationService.closePlayback()

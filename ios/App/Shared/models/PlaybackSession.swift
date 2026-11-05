@@ -35,6 +35,21 @@ class PlaybackSession: Object, Codable, Deletable {
     
     var isLocal: Bool { self.localLibraryItem != nil }
     var mediaPlayer: String { "AVPlayer" }
+    /// The boost saved for this book in dB. Kept outside Realm because it outlives the session.
+    var volumeBoost: Float {
+        get { UserDefaults.standard.float(forKey: self.volumeBoostKey) }
+        set {
+            if newValue == 0 {
+                UserDefaults.standard.removeObject(forKey: self.volumeBoostKey)
+            } else {
+                UserDefaults.standard.set(newValue, forKey: self.volumeBoostKey)
+            }
+        }
+    }
+    private var volumeBoostKey: String {
+        let itemId = self.libraryItemId ?? self.localLibraryItem?.id ?? self.id
+        return "volumeBoost-\(itemId)"
+    }
     var deviceInfo: [String: String?]? {
         var systemInfo = utsname()
         uname(&systemInfo)

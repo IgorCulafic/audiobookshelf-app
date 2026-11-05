@@ -42,6 +42,10 @@ import com.audiobookshelf.app.plugins.AbsLogger
 import com.audiobookshelf.app.server.ApiHandler
 import com.google.android.exoplayer2.*
 import com.google.android.exoplayer2.audio.AudioAttributes
+import com.google.android.exoplayer2.audio.AudioCapabilities
+import com.google.android.exoplayer2.audio.AudioProcessor
+import com.google.android.exoplayer2.audio.AudioSink
+import com.google.android.exoplayer2.audio.DefaultAudioSink
 import com.google.android.exoplayer2.ext.mediasession.MediaSessionConnector
 import com.google.android.exoplayer2.ext.mediasession.MediaSessionConnector.CustomActionProvider
 import com.google.android.exoplayer2.ext.mediasession.TimelineQueueNavigator
@@ -109,6 +113,7 @@ class PlayerNotificationService : MediaBrowserServiceCompat() {
 
   lateinit var mPlayer: ExoPlayer
   lateinit var currentPlayer: Player
+  private val volumeBoostProcessor = VolumeBoostAudioProcessor()
   var castPlayer: CastPlayer? = null
 
   lateinit var sleepTimerManager: SleepTimerManager
@@ -396,8 +401,31 @@ class PlayerNotificationService : MediaBrowserServiceCompat() {
                     )
                     .build()
 
+    // Same sink as DefaultRenderersFactory, with the volume boost added to its audio processors
+    val renderersFactory =
+            object : DefaultRenderersFactory(this) {
+              override fun buildAudioSink(
+                      context: Context,
+                      enableFloatOutput: Boolean,
+                      enableAudioTrackPlaybackParams: Boolean,
+                      enableOffload: Boolean
+              ): AudioSink {
+                return DefaultAudioSink.Builder()
+                        .setAudioCapabilities(AudioCapabilities.getCapabilities(context))
+                        .setAudioProcessors(arrayOf<AudioProcessor>(volumeBoostProcessor))
+                        .setEnableFloatOutput(enableFloatOutput)
+                        .setEnableAudioTrackPlaybackParams(enableAudioTrackPlaybackParams)
+                        .setOffloadMode(
+                                if (enableOffload)
+                                        DefaultAudioSink.OFFLOAD_MODE_ENABLED_GAPLESS_REQUIRED
+                                else DefaultAudioSink.OFFLOAD_MODE_DISABLED
+                        )
+                        .build()
+              }
+            }
+
     mPlayer =
-            ExoPlayer.Builder(this)
+            ExoPlayer.Builder(this, renderersFactory)
                     .setLoadControl(customLoadControl)
                     .setSeekBackIncrementMs(deviceSettings.jumpBackwardsTimeMs)
                     .setSeekForwardIncrementMs(deviceSettings.jumpForwardTimeMs)
@@ -468,6 +496,7 @@ class PlayerNotificationService : MediaBrowserServiceCompat() {
     }
 
     currentPlaybackSession = playbackSession
+    volumeBoostProcessor.setBoostDb(getVolumeBoost())
     DeviceManager.setLastPlaybackSession(
             playbackSession
     ) // Save playback session to use when app is closed
@@ -1022,6 +1051,19 @@ class PlayerNotificationService : MediaBrowserServiceCompat() {
 
     // Refresh Android Auto actions
     mediaProgressSyncer.currentPlaybackSession?.let { setMediaSessionConnectorCustomActions(it) }
+  }
+
+  /** The boost saved for the current book, in dB. */
+  fun getVolumeBoost(): Float {
+    val key = currentPlaybackSession?.volumeBoostKey ?: return 0f
+    return DeviceManager.dbManager.getVolumeBoost(key)
+  }
+
+  /** Sets the boost for the current book and remembers it for next time, in dB. */
+  fun setVolumeBoost(boostDb: Float) {
+    val key = currentPlaybackSession?.volumeBoostKey ?: return
+    DeviceManager.dbManager.saveVolumeBoost(key, boostDb)
+    volumeBoostProcessor.setBoostDb(boostDb)
   }
 
   fun closePlayback(calledOnError: Boolean? = false) {

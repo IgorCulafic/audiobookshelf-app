@@ -19,6 +19,8 @@ public class AbsAudioPlayer: CAPPlugin, CAPBridgedPlugin {
         CAPPluginMethod(name: "prepareLibraryItem", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "closePlayback", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "setPlaybackSpeed", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "getVolumeBoost", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "setVolumeBoost", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "setChapterTrack", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "playPlayer", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "pausePlayer", returnType: CAPPluginReturnPromise),
@@ -148,6 +150,17 @@ public class AbsAudioPlayer: CAPPlugin, CAPBridgedPlugin {
             settings.playbackRate = playbackRate
         }
         PlayerHandler.setPlaybackSpeed(speed: settings.playbackRate)
+        call.resolve()
+    }
+
+    @objc func getVolumeBoost(_ call: CAPPluginCall) {
+        // By session, because the UI asks on onPlaybackSession, which is sent before the player starts
+        let session = Database.shared.getPlaybackSession(id: call.getString("sessionId") ?? "")
+        call.resolve(["value": Double(session?.volumeBoost ?? 0)])
+    }
+
+    @objc func setVolumeBoost(_ call: CAPPluginCall) {
+        PlayerHandler.setVolumeBoost(call.getFloat("value", 0))
         call.resolve()
     }
 

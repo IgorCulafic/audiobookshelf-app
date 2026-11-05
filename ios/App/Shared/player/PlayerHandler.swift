@@ -61,6 +61,10 @@ class PlayerHandler {
         self.player?.setPlaybackRate(speed)
     }
     
+    public static func setVolumeBoost(_ boostDb: Float) {
+        self.player?.setVolumeBoost(boostDb)
+    }
+
     public static func setChapterTrack() {
         self.player?.setChapterTrack()
     }

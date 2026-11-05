@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		6DB496A423BB1E4CB8BAFB5D /* VolumeBoostTap.swift in Sources */ = {isa = PBXBuildFile; fileRef = 367F4DFCFF965BA76B4970A4 /* VolumeBoostTap.swift */; };
+		959D08268C086A86BAFF52BB /* VolumeBoostLimiter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BCC0A0CC7F968A97B957B64 /* VolumeBoostLimiter.swift */; };
 		2FAD9763203C412B000D30F8 /* config.xml in Resources */ = {isa = PBXBuildFile; fileRef = 2FAD9762203C412B000D30F8 /* config.xml */; };
 		3A200C1527D64D7E00CBF02E /* AudioPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A200C1427D64D7E00CBF02E /* AudioPlayer.swift */; };
 		3A90295F280968E700E1D427 /* PlaybackReport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A90295E280968E700E1D427 /* PlaybackReport.swift */; };
@@ -81,6 +83,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		367F4DFCFF965BA76B4970A4 /* VolumeBoostTap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VolumeBoostTap.swift; sourceTree = "<group>"; };
+		6BCC0A0CC7F968A97B957B64 /* VolumeBoostLimiter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VolumeBoostLimiter.swift; sourceTree = "<group>"; };
 		2FAD9762203C412B000D30F8 /* config.xml */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = config.xml; sourceTree = "<group>"; };
 		3A200C1427D64D7E00CBF02E /* AudioPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioPlayer.swift; sourceTree = "<group>"; };
 		3A90295E280968E700E1D427 /* PlaybackReport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaybackReport.swift; sourceTree = "<group>"; };
@@ -197,6 +201,8 @@
 				E9DFCBFA28C28F4A00B36356 /* AudioPlayerSleepTimer.swift */,
 				3ABF618E2804325C0070250E /* PlayerHandler.swift */,
 				E9E985F728B02D9400957F23 /* PlayerProgress.swift */,
+				367F4DFCFF965BA76B4970A4 /* VolumeBoostTap.swift */,
+				6BCC0A0CC7F968A97B957B64 /* VolumeBoostLimiter.swift */,
 			);
 			path = player;
 			sourceTree = "<group>";
@@ -549,6 +555,8 @@
 				E9E985F828B02D9400957F23 /* PlayerProgress.swift in Sources */,
 				E9D5505E28AC1C8500C746DD /* MediaProgress.swift in Sources */,
 				3A200C1527D64D7E00CBF02E /* AudioPlayer.swift in Sources */,
+				6DB496A423BB1E4CB8BAFB5D /* VolumeBoostTap.swift in Sources */,
+				959D08268C086A86BAFF52BB /* VolumeBoostLimiter.swift in Sources */,
 				4DFE2DA32D345C390000B204 /* MyViewController.swift in Sources */,
 				E9D5507128AC1EC700C746DD /* DownloadItemPart.swift in Sources */,
 				EACB38142BCCA1410060DA4A /* LegacyAudioPlayerRateManager.swift in Sources */,
